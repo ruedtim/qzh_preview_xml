@@ -7,24 +7,30 @@ const QZHApp = (function() {
     'use strict';
 
     // DOM Elements
-    let dropzone, preview, fileInput;
-    let metadataEl, headingEl, bodyEl, backEl, filenameEl;
+    let dropzonePage, dropzone, preview, fileInput;
+    let metadataEl, bodyEl, backEl;
+    let docIdEl, docTitleEl, docDateEl;
+    let registersEl;
     let errorModal, errorMessage, closeErrorBtn;
     let newFileBtn;
+    let tabs, tabContents;
 
     /**
      * Initialize application
      */
     function init() {
         // Get DOM elements
+        dropzonePage = document.getElementById('dropzone-page');
         dropzone = document.getElementById('dropzone');
         preview = document.getElementById('preview');
         fileInput = document.getElementById('fileInput');
         metadataEl = document.getElementById('metadata');
-        headingEl = document.getElementById('documentHeading');
         bodyEl = document.getElementById('documentBody');
         backEl = document.getElementById('documentBack');
-        filenameEl = document.getElementById('filename');
+        docIdEl = document.getElementById('docId');
+        docTitleEl = document.getElementById('docTitle');
+        docDateEl = document.getElementById('docDate');
+        registersEl = document.getElementById('registers');
         errorModal = document.getElementById('errorModal');
         errorMessage = document.getElementById('errorMessage');
         closeErrorBtn = document.getElementById('closeError');
@@ -34,6 +40,31 @@ const QZHApp = (function() {
         setupDragDrop();
         setupFileInput();
         setupButtons();
+        setupTabs();
+    }
+
+    /**
+     * Setup tab navigation
+     */
+    function setupTabs() {
+        tabs = document.querySelectorAll('.qzh-tab');
+        tabContents = document.querySelectorAll('.qzh-tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show correct content
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById('tab-' + targetTab).classList.remove('hidden');
+            });
+        });
     }
 
     /**
@@ -201,71 +232,82 @@ const QZHApp = (function() {
      * Render document to DOM
      */
     function renderDocument(result, filename) {
-        // Set filename
-        filenameEl.textContent = filename;
-        
-        // Render metadata and registers in sidebar
-        let sidebarHtml = '';
-        
-        if (result.metadata) {
-            sidebarHtml += renderMetadata(result.metadata);
-        } else {
-            sidebarHtml += '<p class="no-metadata">Keine Metadaten vorhanden</p>';
-        }
-        
-        // Render registers
-        if (result.registers) {
-            sidebarHtml += renderRegisters(result.registers);
-        }
-        
-        metadataEl.innerHTML = sidebarHtml;
-        setupMetadataCollapse();
-        
-        // Render heading
+        // Set document header info
         if (result.heading) {
-            headingEl.innerHTML = renderHeading(result.heading);
-        } else {
-            headingEl.innerHTML = '';
+            docIdEl.textContent = result.heading.idno || extractIdFromFilename(filename);
+            docTitleEl.textContent = result.heading.title || 'Dokument';
+            docDateEl.textContent = result.heading.date || '';
         }
         
-        // Render body
+        // Render metadata (Stückbeschreibung)
+        if (result.metadata) {
+            metadataEl.innerHTML = renderMetadata(result.metadata);
+        } else {
+            metadataEl.innerHTML = '<p class="no-metadata">Keine Metadaten vorhanden</p>';
+        }
+        
+        // Render body (Editionstext)
         if (result.body) {
             bodyEl.innerHTML = result.body;
         } else {
             bodyEl.innerHTML = '<p class="no-content">Kein Inhalt vorhanden</p>';
         }
         
-        // Render back matter
+        // Render back matter (Kommentar)
         if (result.back) {
             backEl.innerHTML = result.back;
-            backEl.classList.remove('hidden');
         } else {
-            backEl.innerHTML = '';
-            backEl.classList.add('hidden');
+            backEl.innerHTML = '<p class="no-content">Kein Kommentar vorhanden</p>';
+        }
+        
+        // Render registers in sidebar
+        if (result.registers) {
+            registersEl.innerHTML = renderRegisters(result.registers, result.metadata);
         }
         
         // Render footnotes
         if (result.footnotes && result.footnotes.length > 0) {
             renderFootnotes(result.footnotes);
         }
+        
+        // Switch to Editionstext tab by default
+        const editionTab = document.querySelector('.qzh-tab[data-tab="edition"]');
+        if (editionTab) {
+            editionTab.click();
+        }
+    }
+    
+    /**
+     * Extract QZH ID from filename
+     */
+    function extractIdFromFilename(filename) {
+        const match = filename.match(/QZH[_-]?(\d+)/i);
+        if (match) {
+            return 'QZH ' + match[1].replace(/^0+/, '');
+        }
+        return filename.replace('.xml', '');
     }
     
     /**
      * Render registers (places, persons, keywords)
      */
-    function renderRegisters(registers) {
+    function renderRegisters(registers, metadata) {
         let html = '';
         
         // Places
         if (registers.places && registers.places.length > 0) {
             html += `
-                <div class="metadata-section register-section">
-                    <h4>Ort</h4>
-                    <div class="metadata-content">
-                        <ul class="register-list">
-                            ${registers.places.map(p => `<li class="register-item place">${escapeHTML(p.name)}</li>`).join('')}
-                        </ul>
-                    </div>
+                <div class="qzh-sidebar-section qzh-register">
+                    <h3 class="qzh-sidebar-title">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Ort
+                    </h3>
+                    <ul class="qzh-register-list">
+                        ${registers.places.map(p => `<li class="qzh-register-item place">${escapeHTML(p.name)}</li>`).join('')}
+                    </ul>
                 </div>
             `;
         }
@@ -273,13 +315,37 @@ const QZHApp = (function() {
         // Persons
         if (registers.persons && registers.persons.length > 0) {
             html += `
-                <div class="metadata-section register-section">
-                    <h4>Person</h4>
-                    <div class="metadata-content">
-                        <ul class="register-list">
-                            ${registers.persons.map(p => `<li class="register-item person">${escapeHTML(p.name)}</li>`).join('')}
-                        </ul>
-                    </div>
+                <div class="qzh-sidebar-section qzh-register">
+                    <h3 class="qzh-sidebar-title">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Person
+                    </h3>
+                    <ul class="qzh-register-list">
+                        ${registers.persons.map(p => `<li class="qzh-register-item person">${escapeHTML(p.name)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Keywords from metadata
+        if (metadata && metadata.keywords && metadata.keywords.length > 0) {
+            html += `
+                <div class="qzh-sidebar-section qzh-register">
+                    <h3 class="qzh-sidebar-title">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" y1="9" x2="20" y2="9"/>
+                            <line x1="4" y1="15" x2="20" y2="15"/>
+                            <line x1="10" y1="3" x2="8" y2="21"/>
+                            <line x1="16" y1="3" x2="14" y2="21"/>
+                        </svg>
+                        Schlagwörter
+                    </h3>
+                    <ul class="qzh-register-list">
+                        ${metadata.keywords.map(k => `<li class="qzh-register-item keyword">${escapeHTML(k.text)}</li>`).join('')}
+                    </ul>
                 </div>
             `;
         }
@@ -288,92 +354,71 @@ const QZHApp = (function() {
     }
 
     /**
-     * Render metadata to HTML
+     * Render metadata to HTML (Stückbeschreibung)
      */
     function renderMetadata(meta) {
-        let html = '';
+        let html = '<table class="qzh-metadata-table">';
         
         // Signatur
         if (meta.idno) {
             html += `
-                <div class="metadata-section">
-                    <h4>Signatur</h4>
-                    <div class="metadata-content">
-                        ${meta.idnoSource 
-                            ? `<a href="${escapeAttr(meta.idnoSource)}" target="_blank" rel="noopener">${escapeHTML(meta.idno)}</a>`
-                            : escapeHTML(meta.idno)
-                        }
-                    </div>
-                </div>
+                <tr>
+                    <th>Signatur</th>
+                    <td>${meta.idnoSource 
+                        ? `<a href="${escapeAttr(meta.idnoSource)}" target="_blank" rel="noopener">${escapeHTML(meta.idno)}</a>`
+                        : escapeHTML(meta.idno)
+                    }</td>
+                </tr>
             `;
         }
         
         // Datierung
         if (meta.date || meta.dateText) {
             html += `
-                <div class="metadata-section">
-                    <h4>Datierung</h4>
-                    <div class="metadata-content">
-                        ${escapeHTML(meta.dateText || meta.date)}
-                    </div>
-                </div>
+                <tr>
+                    <th>Datierung</th>
+                    <td>${escapeHTML(meta.dateText || meta.date)}</td>
+                </tr>
             `;
         }
         
         // Überlieferung
-        if (meta.filiation || meta.material) {
+        if (meta.filiation) {
             html += `
-                <div class="metadata-section">
-                    <h4>Überlieferung</h4>
-                    <div class="metadata-content">
-                        <ul>
-                            ${meta.filiation ? `<li>${escapeHTML(meta.filiation)}</li>` : ''}
-                            ${meta.material ? `<li><span class="metadata-label">Material:</span> ${escapeHTML(meta.material)}</li>` : ''}
-                            ${meta.dimensions ? `<li><span class="metadata-label">Format:</span> ${escapeHTML(meta.dimensions)}</li>` : ''}
-                            ${meta.condition ? `<li><span class="metadata-label">Zustand:</span> ${escapeHTML(meta.condition)}</li>` : ''}
-                        </ul>
-                    </div>
-                </div>
+                <tr>
+                    <th>Überlieferung</th>
+                    <td>${escapeHTML(meta.filiation)}</td>
+                </tr>
             `;
         }
         
-        // Siegel
-        if (meta.seals && meta.seals.length > 0) {
+        // Material
+        if (meta.material) {
             html += `
-                <div class="metadata-section">
-                    <h4>Siegel</h4>
-                    <div class="metadata-content">
-                        <ul>
-                            ${meta.seals.map(s => `<li>${escapeHTML(s)}</li>`).join('')}
-                        </ul>
-                    </div>
-                </div>
+                <tr>
+                    <th>Beschreibstoff</th>
+                    <td>${escapeHTML(meta.material)}</td>
+                </tr>
+            `;
+        }
+        
+        // Format
+        if (meta.dimensions) {
+            html += `
+                <tr>
+                    <th>Format</th>
+                    <td>${escapeHTML(meta.dimensions)}</td>
+                </tr>
             `;
         }
         
         // Sprache
         if (meta.textLang) {
             html += `
-                <div class="metadata-section">
-                    <h4>Sprache</h4>
-                    <div class="metadata-content">
-                        ${escapeHTML(meta.textLang)}
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Schlagworte
-        if (meta.keywords && meta.keywords.length > 0) {
-            html += `
-                <div class="metadata-section">
-                    <h4>Schlagworte</h4>
-                    <div class="metadata-content">
-                        <ul>
-                            ${meta.keywords.map(k => `<li class="term">${escapeHTML(k.text)}</li>`).join('')}
-                        </ul>
-                    </div>
-                </div>
+                <tr>
+                    <th>Sprache</th>
+                    <td>${escapeHTML(meta.textLang)}</td>
+                </tr>
             `;
         }
         
@@ -385,57 +430,20 @@ const QZHApp = (function() {
                 'edit': 'Bearbeitung'
             };
             
+            const editorsList = meta.editors.map(e => {
+                const role = roleLabels[e.role] || e.role || '';
+                return `${escapeHTML(e.name)}${role ? ` (${escapeHTML(role)})` : ''}`;
+            }).join('<br>');
+            
             html += `
-                <div class="metadata-section">
-                    <h4>Bearbeitung</h4>
-                    <div class="metadata-content">
-                        <ul>
-                            ${meta.editors.map(e => {
-                                const role = roleLabels[e.role] || e.role || '';
-                                return `<li>${escapeHTML(e.name)}${role ? ` (${escapeHTML(role)})` : ''}</li>`;
-                            }).join('')}
-                        </ul>
-                    </div>
-                </div>
+                <tr>
+                    <th>Bearbeitung</th>
+                    <td>${editorsList}</td>
+                </tr>
             `;
         }
         
-        return html;
-    }
-
-    /**
-     * Setup collapsible metadata sections
-     */
-    function setupMetadataCollapse() {
-        const sections = metadataEl.querySelectorAll('.metadata-section h4');
-        sections.forEach(h4 => {
-            h4.addEventListener('click', function() {
-                this.parentElement.classList.toggle('collapsed');
-            });
-        });
-    }
-
-    /**
-     * Render heading
-     */
-    function renderHeading(heading) {
-        let html = '';
-        
-        if (heading.title) {
-            html += `<h2>${escapeHTML(heading.title)}</h2>`;
-        }
-        
-        if (heading.date || heading.idno) {
-            html += '<div class="doc-date">';
-            if (heading.date) {
-                html += escapeHTML(heading.date);
-            }
-            if (heading.idno) {
-                html += heading.date ? ` (${escapeHTML(heading.idno)})` : escapeHTML(heading.idno);
-            }
-            html += '</div>';
-        }
-        
+        html += '</table>';
         return html;
     }
 
@@ -479,7 +487,7 @@ const QZHApp = (function() {
      * Show dropzone, hide preview
      */
     function showDropzone() {
-        dropzone.classList.remove('hidden');
+        dropzonePage.classList.remove('hidden');
         preview.classList.add('hidden');
     }
 
@@ -487,7 +495,7 @@ const QZHApp = (function() {
      * Show preview, hide dropzone
      */
     function showPreview() {
-        dropzone.classList.add('hidden');
+        dropzonePage.classList.add('hidden');
         preview.classList.remove('hidden');
     }
 
