@@ -1,6 +1,7 @@
 /* ==========================================================================
    QZH XML Preview - Styles
    Based on: https://github.com/stazh/qzh
+   Faksimile of: https://qzh.sources-online.org
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -18,6 +19,10 @@
     --pb-color-primary: #333333;
     --pb-view-max-width: 900px;
     --qzh-link-color: var(--pb-brand-color);
+    --qzh-sidebar-width: 280px;
+    --qzh-header-height: 60px;
+    --qzh-title-height: 140px;
+    --qzh-tabs-height: 50px;
     
     /* Heading sizes */
     --pb-h1-font-size: 1.8rem;
@@ -40,9 +45,13 @@
     box-sizing: border-box;
 }
 
-body {
+html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
+}
+
+body {
     font-family: var(--pb-base-font-family);
     font-size: var(--pb-content-font-size);
     color: var(--pb-color-primary);
@@ -50,9 +59,18 @@ body {
     line-height: 1.6;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* --------------------------------------------------------------------------
-   App Header
+   Dropzone Page (Upload Screen)
    -------------------------------------------------------------------------- */
+.dropzone-page {
+    min-height: 100vh;
+    background: #f5f5f5;
+}
+
 .app-header {
     background: var(--pb-brand-color);
     color: white;
@@ -77,21 +95,10 @@ body {
     text-decoration: underline;
 }
 
-/* --------------------------------------------------------------------------
-   App Main Layout
-   -------------------------------------------------------------------------- */
 .app-main {
-    min-height: calc(100vh - 80px);
     padding: 1rem;
 }
 
-.hidden {
-    display: none !important;
-}
-
-/* --------------------------------------------------------------------------
-   Drop Zone
-   -------------------------------------------------------------------------- */
 .dropzone {
     max-width: 600px;
     margin: 3rem auto;
@@ -101,6 +108,7 @@ body {
     border-radius: 12px;
     text-align: center;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .dropzone.dragover {
@@ -110,10 +118,6 @@ body {
 }
 
 .dropzone-content {
-    pointer-events: none;
-}
-
-.dropzone.dragover .dropzone-content {
     pointer-events: none;
 }
 
@@ -159,186 +163,329 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Preview Container
+   QZH Page Layout (Document View)
    -------------------------------------------------------------------------- */
-.preview {
-    max-width: 1200px;
-    margin: 0 auto;
+.qzh-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     background: white;
-    border-radius: 8px;
-    box-shadow: var(--pb-box-shadow);
-    overflow: hidden;
 }
 
-.toolbar {
+/* QZH Header */
+.qzh-header {
+    background: var(--pb-brand-color);
+    height: var(--qzh-header-height);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.qzh-header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 100%;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    background: #f8f8f8;
-    border-bottom: 1px solid #e0e0e0;
+    justify-content: space-between;
 }
 
-.toolbar-btn {
+.qzh-logo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.qzh-logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.05em;
+}
+
+.qzh-logo-sub {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 400;
+}
+
+.qzh-logo-sub a {
+    color: white;
+    text-decoration: underline;
+}
+
+.qzh-logo-sub a:hover {
+    color: rgba(255,255,255,0.9);
+}
+
+.qzh-new-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: white;
-    border: 1px solid #ddd;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
     border-radius: 4px;
+    color: white;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #555;
     transition: all 0.2s;
 }
 
-.toolbar-btn:hover {
-    background: var(--pb-brand-color);
-    color: white;
-    border-color: var(--pb-brand-color);
+.qzh-new-btn:hover {
+    background: rgba(255,255,255,0.25);
 }
 
-.toolbar-btn svg {
-    width: 18px;
-    height: 18px;
+/* Title Section */
+.qzh-title-section {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1.5rem 0;
 }
 
-.filename {
-    color: #666;
+.qzh-title-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.qzh-doc-id {
     font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.qzh-doc-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--pb-color-primary);
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+}
+
+.qzh-doc-date {
+    font-size: 1rem;
+    color: #666;
     font-style: italic;
 }
 
-/* --------------------------------------------------------------------------
-   Document Container Layout
-   -------------------------------------------------------------------------- */
-.document-container {
-    display: flex;
-    min-height: calc(100vh - 200px);
-}
-
-.sidebar {
-    width: 280px;
-    flex-shrink: 0;
-    background: #fafafa;
-    border-right: 1px solid #e0e0e0;
-    padding: 1rem;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-}
-
-.content-area {
-    flex: 1;
-    padding: 1.5rem 2rem;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
-}
-
-@media screen and (max-width: 768px) {
-    .document-container {
-        flex-direction: column;
-    }
-    
-    .sidebar {
-        width: 100%;
-        max-height: none;
-        border-right: none;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .content-area {
-        max-height: none;
-    }
-}
-
-/* --------------------------------------------------------------------------
-   Metadata Sidebar (from qzh.css)
-   -------------------------------------------------------------------------- */
-.metadata {
-    font-size: 0.85rem;
-}
-
-.metadata-section {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+/* Tab Navigation */
+.qzh-tabs {
+    background: white;
     border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: var(--qzh-header-height);
+    z-index: 90;
 }
 
-.metadata-section:last-child {
-    border-bottom: none;
+.qzh-tabs-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    gap: 0;
 }
 
-.metadata-section h4 {
-    margin: 0 0 0.5rem;
-    color: var(--pb-brand-color);
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
+.qzh-tab {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
 }
 
-.metadata-section h4::before {
-    content: '▼';
-    font-size: 0.6rem;
-    transition: transform 0.2s;
+.qzh-tab:hover {
+    color: var(--pb-brand-color);
+    background: #f8f9fa;
 }
 
-.metadata-section.collapsed h4::before {
-    transform: rotate(-90deg);
+.qzh-tab.active {
+    color: var(--pb-brand-color);
+    border-bottom-color: var(--pb-brand-color);
+    font-weight: 600;
 }
 
-.metadata-section.collapsed .metadata-content {
-    display: none;
+.qzh-tab svg {
+    opacity: 0.7;
 }
 
-.metadata-content {
-    padding-left: 1rem;
+.qzh-tab.active svg {
+    opacity: 1;
 }
 
-.metadata-content ul {
+/* Content Area */
+.qzh-content {
+    flex: 1;
+    background: #f5f5f5;
+}
+
+.qzh-content-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    min-height: calc(100vh - var(--qzh-header-height) - var(--qzh-title-height) - var(--qzh-tabs-height));
+}
+
+/* Sidebar */
+.qzh-sidebar {
+    width: var(--qzh-sidebar-width);
+    flex-shrink: 0;
+    background: white;
+    border-left: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: calc(100vh - var(--qzh-header-height) - var(--qzh-tabs-height));
+    position: sticky;
+    top: calc(var(--qzh-header-height) + var(--qzh-tabs-height));
+}
+
+.qzh-sidebar-right {
+    order: 2;
+}
+
+.qzh-sidebar-section {
+    margin-bottom: 1.5rem;
+}
+
+.qzh-sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--pb-brand-color);
+    margin: 0 0 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.qzh-sidebar-title svg {
+    opacity: 0.7;
+}
+
+/* Registers */
+.qzh-register {
+    padding-top: 1rem;
+    border-top: 1px solid #e8e8e8;
+}
+
+.qzh-register-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.metadata-content li {
-    margin-bottom: 0.3rem;
+.qzh-register-item {
+    font-size: 0.85rem;
+    padding: 0.3rem 0;
+    cursor: pointer;
+    transition: background 0.15s;
 }
 
-.metadata-label {
-    font-weight: 600;
-    color: #666;
+.qzh-register-item:hover {
+    text-decoration: underline;
 }
 
-/* --------------------------------------------------------------------------
-   Document Heading (from qzh.css)
-   -------------------------------------------------------------------------- */
-.document-heading {
-    padding: 0 0 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    font-family: var(--pb-content-font-family);
+.qzh-register-item.place {
+    color: #055005;
 }
 
-.document-heading h2 {
-    margin: 0 0 0.5rem;
-    font-size: var(--pb-h2-font-size);
+.qzh-register-item.person {
+    color: #395576;
+}
+
+.qzh-register-item.keyword {
+    color: #740502;
+}
+
+/* Main Content */
+.qzh-main {
+    flex: 1;
+    background: white;
+    margin: 1.5rem;
+    margin-right: 0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    overflow: hidden;
+    order: 1;
+}
+
+.qzh-tab-content {
+    padding: 2rem;
+}
+
+.qzh-section-title {
+    font-size: 1.3rem;
     font-weight: 700;
+    color: var(--pb-brand-color);
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e8e8e8;
+}
+
+/* Metadata Table (Stückbeschreibung) */
+.qzh-metadata-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.qzh-metadata-table th,
+.qzh-metadata-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.qzh-metadata-table th {
+    width: 180px;
+    font-weight: 600;
+    color: #555;
+    background: #fafafa;
+}
+
+.qzh-metadata-table td {
     color: var(--pb-color-primary);
 }
 
-.document-heading .doc-date {
-    color: #666;
-    font-style: italic;
+/* Comment Area */
+.qzh-comment {
+    font-size: var(--pb-content-font-size);
+    line-height: 1.7;
+}
+
+.qzh-comment p {
+    margin: 0 0 1em;
+    text-align: justify;
+}
+
+/* Edition Text */
+.qzh-edition {
+    font-size: var(--pb-content-font-size);
+    line-height: 1.7;
 }
 
 /* --------------------------------------------------------------------------
    Body Content (from qzh.css, qzh-odd.css)
    -------------------------------------------------------------------------- */
-.body, .body > *, .footnotes .footnote {
+.body, .qzh-edition {
+    font-family: var(--pb-content-font-family);
+    font-size: var(--pb-content-font-size);
+}
+
+.body > *, .footnotes .footnote {
     font-family: var(--pb-content-font-family);
     font-size: var(--pb-content-font-size);
 }
@@ -765,10 +912,9 @@ a:hover, a:active, a:focus {
 /* --------------------------------------------------------------------------
    Back Matter / Commentary
    -------------------------------------------------------------------------- */
-.back {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 2px solid #e0e0e0;
+.back, .qzh-comment {
+    font-size: var(--pb-content-font-size);
+    line-height: 1.7;
 }
 
 .back h3 {
@@ -776,17 +922,24 @@ a:hover, a:active, a:focus {
     color: var(--pb-brand-color);
 }
 
-.back ol {
+.back ol, .qzh-comment ol {
     padding-left: 1.5rem;
 }
 
-.back ol li {
+.back ol li, .qzh-comment ol li {
     margin-bottom: 0.75rem;
 }
 
-.back p {
-    text-align: left;
+.back p, .qzh-comment p {
+    text-align: justify;
     margin: 0 0 1em;
+}
+
+.no-content {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -887,43 +1040,14 @@ section:first-child, .tei-div:first-child {
     padding-top: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Register Sections
-   -------------------------------------------------------------------------- */
-.register-section {
-    margin-top: 1.5rem;
+/* Highlight for TOC navigation */
+.tei-head-subtitle.highlight {
+    animation: highlightPulse 2s ease-out;
 }
 
-.register-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.register-item {
-    margin-bottom: 0.4rem;
-    padding: 0.2rem 0;
-    cursor: pointer;
-}
-
-.register-item:hover {
-    text-decoration: underline;
-}
-
-.register-item.place {
-    color: #055005;
-}
-
-.register-item.person {
-    color: #395576;
-}
-
-.register-item.organization {
-    color: #395576;
-}
-
-.register-item.term {
-    color: #740502;
+@keyframes highlightPulse {
+    0% { background-color: #fff3cd; }
+    100% { background-color: transparent; }
 }
 
 /* --------------------------------------------------------------------------
@@ -1062,6 +1186,62 @@ section:first-child, .tei-div:first-child {
 /* --------------------------------------------------------------------------
    Responsive Adjustments
    -------------------------------------------------------------------------- */
+@media screen and (max-width: 1024px) {
+    .qzh-content-inner {
+        flex-direction: column;
+    }
+    
+    .qzh-sidebar {
+        width: 100%;
+        max-height: none;
+        position: static;
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+        order: 2;
+    }
+    
+    .qzh-main {
+        margin: 1rem;
+        order: 1;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .qzh-logo-sub {
+        display: none;
+    }
+    
+    .qzh-title-section {
+        padding: 1rem 0;
+    }
+    
+    .qzh-doc-title {
+        font-size: 1.4rem;
+    }
+    
+    .qzh-tabs-inner {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .qzh-tab {
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
+    }
+    
+    .qzh-tab span {
+        display: none;
+    }
+    
+    .qzh-tab-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .qzh-metadata-table th {
+        width: 120px;
+    }
+}
+
 @media screen and (max-width: 600px) {
     .app-header {
         padding: 0.75rem 1rem;
@@ -1072,11 +1252,15 @@ section:first-child, .tei-div:first-child {
         padding: 2rem 1rem;
     }
     
-    .content-area {
-        padding: 1rem;
+    .qzh-header-inner {
+        padding: 0 1rem;
     }
     
-    .sidebar {
-        padding: 0.75rem;
+    .qzh-title-inner {
+        padding: 0 1rem;
+    }
+    
+    .qzh-tabs-inner {
+        padding: 0 0.5rem;
     }
 }

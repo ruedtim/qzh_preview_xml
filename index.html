@@ -7,35 +7,42 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header class="app-header">
-        <h1>QZH XML Preview</h1>
-        <p class="subtitle">TEI-XML Vorschau im Stil von <a href="https://qzh.sources-online.org" target="_blank">Quellen zur Zürcher Geschichte</a></p>
-    </header>
-
-    <main class="app-main">
-        <!-- Drop Zone (visible when no document loaded) -->
-        <div id="dropzone" class="dropzone">
-            <div class="dropzone-content">
-                <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <p class="dropzone-text">XML-Datei hierher ziehen</p>
-                <p class="dropzone-subtext">oder</p>
-                <label class="file-input-label">
-                    <input type="file" id="fileInput" accept=".xml" hidden>
-                    <span class="file-input-button">Datei auswählen</span>
-                </label>
+    <!-- Drop Zone Page (visible when no document loaded) -->
+    <div id="dropzone-page" class="dropzone-page">
+        <header class="app-header">
+            <h1>QZH XML Preview</h1>
+            <p class="subtitle">TEI-XML Vorschau im Stil von <a href="https://qzh.sources-online.org" target="_blank">Quellen zur Zürcher Geschichte</a></p>
+        </header>
+        <main class="app-main">
+            <div id="dropzone" class="dropzone">
+                <div class="dropzone-content">
+                    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p class="dropzone-text">XML-Datei hierher ziehen</p>
+                    <p class="dropzone-subtext">oder</p>
+                    <label class="file-input-label">
+                        <input type="file" id="fileInput" accept=".xml" hidden>
+                        <span class="file-input-button">Datei auswählen</span>
+                    </label>
+                </div>
             </div>
-        </div>
+        </main>
+    </div>
 
-        <!-- Document Preview (visible after loading) -->
-        <div id="preview" class="preview hidden">
-            <!-- Toolbar -->
-            <div class="toolbar">
-                <button id="newFileBtn" class="toolbar-btn" title="Neue Datei laden">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <!-- QZH Document Preview (visible after loading) -->
+    <div id="preview" class="qzh-page hidden">
+        <!-- QZH Header -->
+        <header class="qzh-header">
+            <div class="qzh-header-inner">
+                <div class="qzh-logo">
+                    <span class="qzh-logo-text">QZH XML Preview</span>
+                    <span class="qzh-logo-sub">TEI-XML Vorschau im Stil von <a href="https://qzh.sources-online.org" target="_blank">Quellen zur Zürcher Geschichte</a></span>
+                </div>
+                <button id="newFileBtn" class="qzh-new-btn" title="Neue Datei laden">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
                         <line x1="12" y1="18" x2="12" y2="12"/>
@@ -43,33 +50,76 @@
                     </svg>
                     Neue Datei
                 </button>
-                <span id="filename" class="filename"></span>
             </div>
+        </header>
 
-            <!-- Document Container -->
-            <div class="document-container">
-                <!-- Sidebar: Metadata -->
-                <aside class="sidebar">
-                    <div id="metadata" class="metadata">
-                        <!-- Metadata will be inserted here -->
-                    </div>
-                </aside>
-
-                <!-- Main Content -->
-                <article class="content-area">
-                    <div id="documentHeading" class="document-heading">
-                        <!-- Document title/heading -->
-                    </div>
-                    <div id="documentBody" class="body">
-                        <!-- Transformed XML content -->
-                    </div>
-                    <div id="documentBack" class="back">
-                        <!-- Commentary/back matter -->
-                    </div>
-                </article>
+        <!-- Document Title Section -->
+        <div class="qzh-title-section">
+            <div class="qzh-title-inner">
+                <div class="qzh-doc-id" id="docId">QZH 015</div>
+                <h1 class="qzh-doc-title" id="docTitle">Dokumenttitel</h1>
+                <div class="qzh-doc-date" id="docDate"></div>
             </div>
         </div>
-    </main>
+
+        <!-- Tab Navigation -->
+        <nav class="qzh-tabs">
+            <div class="qzh-tabs-inner">
+                <button class="qzh-tab" data-tab="description">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    Stückbeschreibung
+                </button>
+                <button class="qzh-tab" data-tab="comment">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Kommentar
+                </button>
+                <button class="qzh-tab active" data-tab="edition">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    Editionstext
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="qzh-content">
+            <div class="qzh-content-inner">
+                <!-- Main Document Area -->
+                <main class="qzh-main">
+                    <!-- Tab: Stückbeschreibung -->
+                    <div id="tab-description" class="qzh-tab-content hidden">
+                        <h2 class="qzh-section-title">Stückbeschreibung</h2>
+                        <div id="metadata" class="qzh-metadata"></div>
+                    </div>
+
+                    <!-- Tab: Kommentar -->
+                    <div id="tab-comment" class="qzh-tab-content hidden">
+                        <h2 class="qzh-section-title">Kommentar</h2>
+                        <div id="documentBack" class="qzh-comment"></div>
+                    </div>
+
+                    <!-- Tab: Editionstext -->
+                    <div id="tab-edition" class="qzh-tab-content">
+                        <div id="documentBody" class="qzh-edition body"></div>
+                    </div>
+                </main>
+
+                <!-- Right Sidebar: Registers -->
+                <aside class="qzh-sidebar qzh-sidebar-right">
+                    <div id="registers" class="qzh-registers"></div>
+                </aside>
+            </div>
+        </div>
+    </div>
 
     <!-- Tooltip container -->
     <div id="tooltip" class="tooltip"></div>
@@ -85,6 +135,7 @@
 
     <script src="js/parser.js"></script>
     <script src="js/tooltips.js"></script>
+    <script src="js/dog.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
