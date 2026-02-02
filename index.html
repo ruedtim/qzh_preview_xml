@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QZH XML Vorschau</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <h1>QZH XML Vorschau</h1>
+        <p>
+          Lade eine XML-Datei hoch oder ziehe sie in die Drop-Zone, um eine Vorschau im QZH-Stil zu sehen.
+        </p>
+      </header>
+
+      <section class="uploader">
+        <label class="uploader__drop" for="file-input">
+          <span class="uploader__title">XML hier ablegen</span>
+          <span class="uploader__hint">oder klicken, um eine Datei auszuwählen</span>
+          <input id="file-input" type="file" accept=".xml,application/xml,text/xml" />
+        </label>
+        <p class="uploader__status" id="status" aria-live="polite"></p>
+      </section>
+
+      <section class="preview" aria-live="polite">
+        <div class="preview__empty" id="empty-state">XML hier ablegen</div>
+        <div class="preview__error" id="error" role="alert"></div>
+        <article class="preview__content" id="preview"></article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
