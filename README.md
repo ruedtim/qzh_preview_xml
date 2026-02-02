@@ -25,4 +25,4 @@ Dann im Browser `http://localhost:8000` öffnen.
 
 ## Styling
 
-Die Styles für XML-Elemente orientieren sich an den Klassen aus dem QZH-Repository (`resources/css/theme-qzh.css` und `resources/css/epub.css`). Diese Klassen werden im Renderer über ein Tag-zu-Style-Mapping angewendet.
+Die Styles für XML-Elemente sind direkt aus dem QZH-Repository übernommen (`resources/css/theme.css`, `resources/css/theme-qzh.css`, `resources/css/epub.css`). Diese Klassen werden im Renderer über ein Tag-zu-Style-Mapping angewendet, damit die Darstellung der QZH-Version entspricht.

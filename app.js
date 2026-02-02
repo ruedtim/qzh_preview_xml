@@ -82,8 +82,19 @@ function renderNode(node) {
     elementTag = "li";
   } else if (tagName === "quote") {
     elementTag = "blockquote";
+  } else if (tagName === "table") {
+    elementTag = "table";
+  } else if (tagName === "row") {
+    elementTag = "tr";
+  } else if (tagName === "cell") {
+    const role = (node.getAttribute("role") || "").toLowerCase();
+    elementTag = role === "label" || role === "head" ? "th" : "td";
   } else if (tagName === "graphic") {
     elementTag = "img";
+  } else if (tagName === "ref") {
+    elementTag = node.getAttribute("target") ? "a" : "span";
+  } else if (tagName === "note") {
+    elementTag = "sup";
   } else if (blockTags.has(tagName)) {
     elementTag = "div";
   }
@@ -115,6 +126,14 @@ function renderNode(node) {
 
   if (elementTag === "img") {
     return el;
+  }
+
+  if (tagName === "table") {
+    el.classList.add("table", "table-bordered", "table-striped");
+  }
+
+  if (tagName === "cell" && el.tagName.toLowerCase() === "th") {
+    el.classList.add("table-head");
   }
 
   if (listTags.has(tagName)) {
