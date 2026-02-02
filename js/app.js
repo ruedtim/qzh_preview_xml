@@ -544,4 +544,5 @@ const QZHApp = (function() {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
     QZHApp.init();
+    QZHDog.init();
 });
