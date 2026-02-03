@@ -726,13 +726,11 @@ const QZHParser = (function() {
             }
         }
         
-        // If there are multiple items, use numbered list
+        // If there are multiple items, render each as a paragraph
         if (items.length > 1) {
-            html += '<ol>';
             for (const item of items) {
-                html += `<li>${item}</li>`;
+                html += `<p>${item}</p>`;
             }
-            html += '</ol>';
         } else if (items.length === 1) {
             html += `<p>${items[0]}</p>`;
         } else {
